@@ -1,0 +1,35 @@
+{
+  "name": "skype msg blackup",
+  "description": "紀錄以修改的訊息或是刪除的訊息",
+  "version": "0.0.1",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_icon": "icon48-off.png",
+    "default_title": "skype msg blackup"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.skype.com/*"],
+      "js": ["js/jquery.min.js", "js/content.js"],
+      "all_frames":true,
+      "run_at":"document_start"
+    }
+  ],
+  "manifest_version": 2,
+  "icons": { 
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "web_accessible_resources": ["images/history.png"]
+}
