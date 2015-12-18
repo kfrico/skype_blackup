@@ -4,10 +4,7 @@ var backup_msg = {};
 $('<style>.iedit {cursor: pointer; margin-top: 10px !important;width: 16px;height: 16px;background-image: url('+chrome.extension.getURL('images/history.png')+');} .backup_msg_box {display: none;} .backup_msg {font-size: 16px !important; color: red; margin: 10px 0px !important;}</style>').prependTo('html');
 
 $(function(){
-    document.addEventListener("contextmenu", function (e) {
-        $(".ipushsRightTarget").removeClass("ipushsRightTarget");
-        e.srcElement.classList.add("ipushsRightTarget");
-    });
+
 });
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -33,7 +30,6 @@ function browserAction(options,url){
             var element = e.target;
 
             if (element.tagName == 'SWX-MESSAGE') {
-
                 setTimeout(function() {
                     var $element = $(element),
                         id       = $element.find('.content').attr('id');
@@ -41,17 +37,18 @@ function browserAction(options,url){
                     if (!backup_msg.hasOwnProperty(id)) {
                         var date = formatAMPM(new Date());
 
-                        backup_msg[id] = $element.find('.content p').text() + ' (' + date + ')';
+                        backup_msg[id] = [];
+                        backup_msg[id].push($element.find('.content p').text() + ' (' + date + ')');
+
                         $element.find('.content').append('<div class="backup_msg_box"></div>');
 
                         $('.history').on('DOMSubtreeModified', '#'+id+' p', function(){
-
                             var $content        = $(this).parent(),
                                 $backup_msg_box = $content.find('.backup_msg_box'),
                                 $backup         = $backup_msg_box.find('.backup_msg'),
                                 id              = $content.attr('id'),
                                 msg             = $(this).text(),
-                                old_msg         = backup_msg[id],
+                                old_msg         = backup_msg[id][backup_msg[id].length-1],
                                 date            = formatAMPM(new Date());
 
                             if (msg == '') {
@@ -61,16 +58,24 @@ function browserAction(options,url){
                             if ($backup.length) {
                                 if ($backup.eq(-1).text() != msg) {
                                     $backup_msg_box.append('<div class="backup_msg">'+old_msg+'</div>');
-                                    backup_msg[id] = msg + ' (' + date + ')';
+                                    backup_msg[id].push(msg + ' (' + date + ')');
                                 }
                             } else {
-                                $content.append('<div class="iedit"></div>');
                                 $backup_msg_box.append('<div class="backup_msg">'+old_msg+'</div>');
-                                backup_msg[id] = msg + ' (' + date + ')';
-
+                                $content.append('<div class="iedit"></div>');
+                                backup_msg[id].push(msg + ' (' + date + ')');
                             }
                         });
 
+                    } else {
+                        if (!$element.find('.backup_msg_box').length && backup_msg[id].length > 1) {
+                            $element.find('.content').append('<div class="backup_msg_box"></div>');
+                            $element.find('.content').append('<div class="iedit"></div>');
+
+                            backup_msg[id].map(function(msg){
+                                $element.find('.backup_msg_box').append('<div class="backup_msg">'+msg+'</div>');
+                            });
+                        }
                     }
                 } , 10);
             }
@@ -88,8 +93,6 @@ function browserAction(options,url){
     }
 
 }
-
-
 
 /*公用function*/
 function formatAMPM(date) {

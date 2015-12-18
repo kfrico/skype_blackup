@@ -40,6 +40,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, info, tab) {
     }
 });
 
+//監聽鍵盤快捷建
+// chrome.commands.onCommand.addListener(function(command)
+// {
+//     if (command == 'reload_extension') {
+//         chrome.runtime.reload();
+//     }
+// });
+
 //監聽browser按鈕事件
 chrome.browserAction.onClicked.addListener(function(tab) {
     // var data = {
