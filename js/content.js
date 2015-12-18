@@ -25,25 +25,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 function browserAction(options,url){
     if(isBrowserAction === false){
 
-        $(document).on('click', '.iedit', function(){
+        $('#chatComponent').on('click', '.iedit', function(){
             $(this).siblings('.backup_msg_box').toggle('normal');
         });
 
-        $(document).on('DOMNodeInserted', '.messageHistory', function(e){
+        $('#chatComponent').on('DOMNodeInserted', '.messageHistory', function(e){
             var element = e.target;
 
             if (element.tagName == 'SWX-MESSAGE') {
 
                 setTimeout(function() {
-                    var id = $(element).find('.content').attr('id');
+                    var $element = $(element),
+                        id       = $element.find('.content').attr('id');
 
                     if (!backup_msg.hasOwnProperty(id)) {
                         var date = formatAMPM(new Date());
 
-                        backup_msg[id] = $(element).find('.content p').text() + ' (' + date + ')';
-                        $(element).find('.content').append('<div class="backup_msg_box"></div>');
+                        backup_msg[id] = $element.find('.content p').text() + ' (' + date + ')';
+                        $element.find('.content').append('<div class="backup_msg_box"></div>');
 
-                        $('#'+id+' p').bind('DOMSubtreeModified', function(){
+                        $('.history').on('DOMSubtreeModified', '#'+id+' p', function(){
 
                             var $content        = $(this).parent(),
                                 $backup_msg_box = $content.find('.backup_msg_box'),
@@ -71,8 +72,7 @@ function browserAction(options,url){
                         });
 
                     }
-                } , 1000);
-
+                } , 10);
             }
         });
 

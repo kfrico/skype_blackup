@@ -1,7 +1,7 @@
 {
   "name": "skype msg blackup",
   "description": "紀錄以修改的訊息或是刪除的訊息",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "permissions": [
     "activeTab",
     "storage",
