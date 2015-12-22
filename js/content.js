@@ -40,44 +40,23 @@ function browserAction(options,url){
                         backup_msg[id] = [];
                         backup_msg[id].push($element.find('.content p').text() + ' (' + date + ')');
 
-                        $element.find('.content').append('<div class="backup_msg_box"></div>');
-
-                        $('.history').on('DOMSubtreeModified', '#'+id+' p', function(){
-                            var $content        = $(this).parent(),
-                                $backup_msg_box = $content.find('.backup_msg_box'),
-                                $backup         = $backup_msg_box.find('.backup_msg'),
-                                id              = $content.attr('id'),
-                                msg             = $(this).text(),
-                                old_msg         = backup_msg[id][backup_msg[id].length-1],
-                                date            = formatAMPM(new Date());
-
-                            if (msg == '') {
-                                return;
-                            }
-
-                            if ($backup.length) {
-                                if ($backup.eq(-1).text() != msg) {
-                                    $backup_msg_box.append('<div class="backup_msg">'+old_msg+'</div>');
-                                    backup_msg[id].push(msg + ' (' + date + ')');
-                                }
-                            } else {
-                                $backup_msg_box.append('<div class="backup_msg">'+old_msg+'</div>');
-                                $content.append('<div class="iedit"></div>');
-                                backup_msg[id].push(msg + ' (' + date + ')');
-                            }
-                        });
-
+                        $('#'+id+' p').bind('DOMSubtreeModified', callback_msg);
                     } else {
+                        var events = jQuery._data($('#'+id+' p')[0], "events");
+                        if (!events || !events.hasOwnProperty('DOMSubtreeModified')) {
+                            $('#'+id+' p').bind('DOMSubtreeModified', callback_msg);
+                        }
+                        
                         if (!$element.find('.backup_msg_box').length && backup_msg[id].length > 1) {
                             $element.find('.content').append('<div class="backup_msg_box"></div>');
                             $element.find('.content').append('<div class="iedit"></div>');
 
-                            backup_msg[id].map(function(msg){
-                                $element.find('.backup_msg_box').append('<div class="backup_msg">'+msg+'</div>');
-                            });
+                            for (var i=0; i < backup_msg[id].length -1; i++) {
+                                $element.find('.backup_msg_box').append('<div class="backup_msg">'+ backup_msg[id][i]+'</div>');
+                            }
                         }
                     }
-                } , 10);
+                } , 100);
             }
         });
 
@@ -94,6 +73,36 @@ function browserAction(options,url){
 
 }
 
+function callback_msg() {
+    var $content = $(this).parent();
+
+    if (!$content.find('.backup_msg_box').length) {
+        $content.append('<div class="backup_msg_box"></div>');
+    }
+
+    var $backup_msg_box = $content.find('.backup_msg_box'),
+        $backup         = $backup_msg_box.find('.backup_msg'),
+        id              = $content.attr('id'),
+        msg             = $(this).text(),
+        old_msg         = backup_msg[id][backup_msg[id].length-1],
+        date            = formatAMPM(new Date());
+
+    if (msg == '') {
+        return;
+    }
+        console.log(old_msg);
+
+    if ($backup.length) {
+        if ($backup.eq(-1).text() != msg) {
+            $backup_msg_box.append('<div class="backup_msg">'+old_msg+'</div>');
+            backup_msg[id].push(msg + ' (' + date + ')');
+        }
+    } else {
+        $backup_msg_box.append('<div class="backup_msg">'+old_msg+'</div>');
+        $content.append('<div class="iedit"></div>');
+        backup_msg[id].push(msg + ' (' + date + ')');
+    }
+}
 /*公用function*/
 function formatAMPM(date) {
     var hours = date.getHours();
